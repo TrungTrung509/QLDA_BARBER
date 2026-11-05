@@ -1,0 +1,35 @@
+{
+  "name": "barbershop-booking-system",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=20.20.0"
+  },
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "concurrently --kill-others-on-fail --names api,web --prefix-colors blue,magenta \"npm run dev --workspace @barbershop/api\" \"npm run dev --workspace @barbershop/web\"",
+    "lint": "eslint . --max-warnings 0",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "vitest run",
+    "test:integration": "vitest run --config vitest.integration.config.ts",
+    "test:e2e": "playwright test",
+    "build": "npm run build --workspaces --if-present",
+    "db:migrate": "npm run db:migrate --workspace @barbershop/api",
+    "db:seed": "npm run db:seed --workspace @barbershop/api"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.1",
+    "@playwright/test": "^1.56.1",
+    "concurrently": "^9.2.1",
+    "eslint": "^9.39.1",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "eslint-plugin-react-refresh": "^0.4.24",
+    "globals": "^16.5.0",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.46.3",
+    "vitest": "^4.0.7"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "entries": [
+    {
+      "sourceId": "learnings:9a555b40e95099d1",
+      "contentHash": "581f9e03b6aacc6fb03385435b9c269a22bba75527a68b6d1c1bc0b6dad118d9",
+      "targetRelativePath": "llm-curated/log.md",
+      "migratedAt": "2026-11-05T03:46:53.870Z"
+    },
+    {
+      "sourceId": "runbook:AGENTS.md:29a4f7524083",
+      "contentHash": "6263f0cf97d3eab307e0f9bfc8feb4d4f5d3f91a5c1a89008b121006080a198d",
+      "targetRelativePath": "llm-curated/runbooks/agents.md",
+      "migratedAt": "2026-11-05T03:46:53.894Z"
+    }
+  ]
+}

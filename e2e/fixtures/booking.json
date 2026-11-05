@@ -1,0 +1,49 @@
+{
+  "shop": {
+    "timezone": "UTC",
+    "openingTime": "09:00",
+    "closingTime": "17:00"
+  },
+  "services": {
+    "haircut30": {
+      "id": "service-classic",
+      "name": "Classic Haircut",
+      "durationMinutes": 30,
+      "priceMinor": 3000
+    },
+    "cutAndBeard60": {
+      "id": "service-deluxe",
+      "name": "Haircut and Beard",
+      "durationMinutes": 60,
+      "priceMinor": 5000
+    },
+    "inactive": {
+      "id": "service-inactive",
+      "name": "Inactive Service",
+      "durationMinutes": 30,
+      "priceMinor": 1000
+    }
+  },
+  "barbers": {
+    "alex": { "id": "barber-alex", "name": "Alex", "active": true },
+    "sam": { "id": "barber-sam", "name": "Sam", "active": true },
+    "inactive": { "id": "barber-inactive", "name": "Inactive", "active": false }
+  },
+  "customer": {
+    "name": "QA Customer",
+    "email": "qa.customer@example.test",
+    "phone": "+12025550123"
+  },
+  "intervals": {
+    "existing": { "start": "2030-06-10T14:00:00.000Z", "end": "2030-06-10T14:30:00.000Z" },
+    "touching": { "start": "2030-06-10T14:30:00.000Z", "end": "2030-06-10T15:00:00.000Z" },
+    "overlap": { "start": "2030-06-10T14:15:00.000Z", "end": "2030-06-10T14:45:00.000Z" }
+  },
+  "dst": {
+    "nonexistentDate": "2030-03-10",
+    "nonexistentLocalTime": "02:30",
+    "ambiguousDate": "2030-11-03",
+    "ambiguousLocalTime": "01:30"
+  }
+}
+

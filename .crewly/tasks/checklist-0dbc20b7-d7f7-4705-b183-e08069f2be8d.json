@@ -1,0 +1,64 @@
+{
+  "taskId": "0dbc20b7-d7f7-4705-b183-e08069f2be8d",
+  "objective": "Barbershop Booking System — responsive website, booking, API/database, management dashboard",
+  "missionId": "mission-1793857893021",
+  "status": "approved",
+  "createdBy": "qlda-team-team-leader-0f797e8a",
+  "createdAt": "2026-11-05T06:00:00Z",
+  "items": [
+    {
+      "id": "chk-1",
+      "category": "functionality",
+      "description": "Landing and service prices readable at 375px and 1440px; booking supports service, barber, date/time and confirmation with loading/empty/error states.",
+      "type": "manual",
+      "critical": true
+    },
+    {
+      "id": "chk-2",
+      "category": "functionality",
+      "description": "Integration tests prove duration-aware availability, invalid/past slot rejection and exactly one success for concurrent overlapping requests for the same barber; cancelled slots reusable.",
+      "type": "command",
+      "command": "npm run test:integration",
+      "critical": true
+    },
+    {
+      "id": "chk-3",
+      "category": "functionality",
+      "description": "Database persists customers, barbers, services and appointments across restart; dashboard lists/filter appointments and supports Pending, Completed and Cancelled transitions.",
+      "type": "command",
+      "command": "npm run test:e2e",
+      "critical": true
+    },
+    {
+      "id": "chk-4",
+      "category": "security",
+      "description": "Protected dashboard and management endpoints reject unauthorized requests; server validates inputs; secrets absent from client and repository; customer information limited to authorized views.",
+      "type": "manual",
+      "critical": true
+    },
+    {
+      "id": "chk-5",
+      "category": "quality",
+      "description": "Strict TypeScript, production build, lint and co-located source tests pass; critical booking and authorization paths covered.",
+      "type": "command",
+      "command": "npm run lint && npm run typecheck && npm test && npm run build",
+      "critical": true
+    },
+    {
+      "id": "chk-6",
+      "category": "quality",
+      "description": "QA verifies keyboard navigation, labels/focus, responsive screens, success and error flows; no open critical/high severity defects.",
+      "type": "manual",
+      "critical": true
+    },
+    {
+      "id": "chk-7",
+      "category": "documentation",
+      "description": "README provides local setup, environment example, migrations/seed, test commands and demo account; timezone, opening hours, cancellation policy and MVP assumptions documented.",
+      "type": "manual",
+      "critical": true
+    }
+  ],
+  "approvedBy": "crewly-orc",
+  "approvalNote": "Explicit orchestrator approval received in conversation; concurrency and security are critical gates."
+}
