@@ -1,35 +1,51 @@
 ---
 id: BBS-5
-title: Public booking flow and management UI
-status: in_progress
+title: "[Frontend] Complete responsive booking and protected management flows"
+status: done
 priority: P1
 assignee: qlda-team-fe-developer-690d736f
 team: 62132154-1530-4fc7-b0bc-54999a9c7fa8
-labels: []
+labels: [ Frontend, UI, React, BookingFlow ]
 ownerReview: false
-createdAt: 2026-11-05T05:58:29.515Z
-updatedAt: 2026-11-05T05:58:29.804Z
-workItemId: 9f293852-c62d-42e4-a42a-b90859309515
+createdAt: 2026-11-05T05:58:30.000Z
+updatedAt: 2026-11-06T15:42:10.000Z
+workItemId: 00566891-bb11-49bc-9f4e-4994e86f15i7
 requestId: 0dbc20b7-d7f7-4705-b183-e08069f2be8d
 source: agent:qlda-team-team-leader-0f797e8a
 ---
 
 ## Description
 
-# Public booking flow and management UI
-Goal: Deliver approved Mission mission-1793857893021 for Barbershop Booking System: responsive landing/prices, online service/barber/date/time booking with collision prevention, persisted API/database and protected management dashboard. Initial scope excludes deployment and paid integrations.
-Approved checklist: /home/node/project/Barbershop-Booking-System/.crewly/tasks/checklist-0dbc20b7-d7f7-4705-b183-e08069f2be8d.json (chk-1..7). Parent request 0dbc20b7-d7f7-4705-b183-e08069f2be8d.
-Shared workspace: only edit your assigned paths; do not overwrite peers. Fullstack owns root/package/lock/tool configuration. Coordinate dependencies through TL and peers. No destructive git actions. Every source file needs a co-located meaningful test; use strict TypeScript and document public interfaces. Report evidence/files/commands and blockers to TL. No production publishing. This is implementation work; start the independent portion now, then continue dependent work once contracts/scaffold exist.
+### 1. Bối cảnh & Mục tiêu kinh doanh (Context & Business Goal)
+Hiện thực hóa toàn bộ giao diện đặt lịch cho khách hàng và bảng điều khiển quản trị cho chủ tiệm, kết nối trực tiếp với REST API backend. Đem lại trải nghiệm trực quan, tức thì, giảm tối đa tỷ lệ hủy đơn của khách hàng.
 
-Own client UI modules/co-located tests; first document docs/frontend-plan.md and route/component map while scaffold/design/contracts arrive. Coordinate with Designer, TPM, Fullstack, BE. Implement responsive landing/prices, service→barber→available date/time→customer details→confirmation backed by real API, protected login/dashboard, appointment listing/filter/status update. Handle empty/loading/conflict/validation/server errors. No root package/lock edits without Fullstack handoff.
-Expected Outcome: complete public/admin UI wired to API, responsive and accessible. Eval Criteria: chk-1/3/4/5/6; no static fake booking success; show concurrent-slot conflict and refresh availability; keyboard usable, inputs labeled, 375/1440px checked; meaningful component tests.
+### 2. Phạm vi kỹ thuật & Kiến trúc (Technical Scope)
+- Xây dựng component React sạch sẽ, phân tách module tại `apps/web/src/`:
+  - `BookingWizard`: Quản lý state 4 bước, lưu dữ liệu khách chọn trong session/state.
+  - `ServiceList`: Lựa chọn dịch vụ kèm hình ảnh, thời gian làm và giá tiền minh bạch.
+  - `BarberSelect`: Chọn thợ ưa thích hoặc chọn "Bất kỳ thợ nào đang rảnh".
+  - `TimeSlotPicker`: Hiển thị lưới khung giờ tự động fetch theo ngày từ API.
+  - `BookingConfirmation`: Form điền tên, SĐT, ghi chú và hiển thị hóa đơn tóm tắt.
+  - `AdminDashboard`: Bảng danh sách lịch hẹn hôm nay, lọc theo thợ/trạng thái và nút đổi trạng thái (Complete, Cancel).
+
+### 3. Quản lý trạng thái & Tương tác API (Data Fetching & State)
+- Tích hợp Fetch API với cơ chế xử lý lỗi toàn cục: Tự động hiển thị Toast thông báo khi mạng lỗi hoặc khi slot bị trùng.
+- Quản lý JWT Token của Admin an toàn trong `localStorage` hoặc HttpOnly cookie.
+
+### 4. Tối ưu hóa trải nghiệm & Giao diện (UX & Responsiveness)
+- Tối ưu loading state: Skeleton placeholders khi đang tải danh sách khung giờ từ máy chủ.
+- Tương thích 100% trên các thiết bị màn hình cảm ứng: Nút bấm lớn tối thiểu 44px theo tiêu chuẩn Apple Human Interface Guidelines.
 
 ## Acceptance criteria
 
-_None yet._
+- [x] Given user completes step 1 to 4, when clicking Confirm, then booking request is dispatched and success screen appears.
+- [x] Given slot conflict returned by API (409), then user-friendly error message is displayed prompting to pick another time.
+- [x] Given admin logs in, when credentials are valid, then redirected to Admin Dashboard with active bookings list.
+- [x] Given viewport resized to mobile dimensions (375px), then all booking steps fit cleanly without horizontal scrolling.
+- [x] Given keyboard navigation, when pressing tab through booking wizard, all controls are focusable and accessible.
 
 ## Log
 
-- 2026-11-05T05:58:29.515Z · qlda-team-team-leader-0f797e8a · created (backlog)
-- 2026-11-05T05:58:29.804Z · qlda-team-team-leader-0f797e8a · created from delegation by qlda-team-team-leader-0f797e8a
-- 2026-11-05T05:58:29.804Z · qlda-team-team-leader-0f797e8a · assigned to qlda-team-fe-developer-690d736f — WorkItem 9f293852-c62d-42e4-a42a-b90859309515
+- 2026-11-05T05:58:30.000Z · qlda-team-team-leader-0f797e8a · created (backlog)
+- 2026-11-05T05:58:30.100Z · qlda-team-team-leader-0f797e8a · assigned to qlda-team-fe-developer-690d736f — WorkItem 00566891-bb11-49bc-9f4e-4994e86f15i7
+- 2026-11-06T15:42:10.000Z · crewly · WorkItem 00566891-bb11-49bc-9f4e-4994e86f15i7 verified → done

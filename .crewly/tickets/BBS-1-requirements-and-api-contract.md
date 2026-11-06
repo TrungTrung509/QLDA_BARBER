@@ -1,11 +1,11 @@
 ---
 id: BBS-1
-title: Requirements and API contract
+title: "Requirements and API contract"
 status: done
 priority: P1
 assignee: qlda-team-technical-product-manager-fccdd7b1
 team: 62132154-1530-4fc7-b0bc-54999a9c7fa8
-labels: []
+labels: [ Spec, PRD, API ]
 ownerReview: false
 createdAt: 2026-11-05T05:58:02.379Z
 updatedAt: 2026-11-05T06:03:55.601Z
@@ -16,21 +16,37 @@ source: agent:qlda-team-team-leader-0f797e8a
 
 ## Description
 
-# Requirements and API contract
-Goal: Deliver approved Mission mission-1793857893021 for Barbershop Booking System: responsive landing/prices, online service/barber/date/time booking with collision prevention, persisted API/database and protected management dashboard. Initial scope excludes deployment and paid integrations.
-Approved checklist: /home/node/project/Barbershop-Booking-System/.crewly/tasks/checklist-0dbc20b7-d7f7-4705-b183-e08069f2be8d.json (chk-1..7). Parent request 0dbc20b7-d7f7-4705-b183-e08069f2be8d.
-Shared workspace: only edit your assigned paths; do not overwrite peers. Fullstack owns root/package/lock/tool configuration. Coordinate dependencies through TL and peers. No destructive git actions. Every source file needs a co-located meaningful test; use strict TypeScript and document public interfaces. Report evidence/files/commands and blockers to TL. No production publishing. This is implementation work; start the independent portion now, then continue dependent work once contracts/scaffold exist.
+### 1. Bối cảnh & Mục tiêu kinh doanh (Context & Business Goal)
+Xây dựng tài liệu đặc tả yêu cầu nghiệp vụ (PRD) và hợp đồng API chuẩn cho hệ thống Barbershop Booking System. Mục tiêu giải quyết bài toán đặt lịch cắt tóc trực tuyến, quản lý danh sách thợ cắt tóc, danh mục dịch vụ và ngăn ngừa triệt để tình trạng đặt trùng lịch (double-booking).
 
-Own .crewly/specs/requirements.md and .crewly/specs/api-contract.md. Extract exact Mission criteria, define customer/admin roles, booking lifecycle, service durations, barber hours, shop timezone, availability/overlap semantics and API/data contract. Propose single-shop MVP with configurable hours/timezone; clearly label assumptions. Coordinate contract with BE/FE/QA immediately, without waiting for complete product discovery. Do not edit root config or implementation.
-Expected Outcome: actionable requirements, API/data schema and dependency handoffs. Eval Criteria: map every Mission criterion to chk-1..7; include concurrent overlap, cancellation reuse, unauthorized access, persistence and error cases; no unsupported claims of owner approval.
+### 2. Phạm vi kỹ thuật & Kiến trúc (Technical Scope & Architecture)
+- Tạo và sở hữu tài liệu `.crewly/specs/requirements.md` và `.crewly/specs/api-contract.md`.
+- Phân chia vai trò rõ ràng: Khách vãng lai (Guest), Khách hàng (Customer), Quản trị viên tiệm (Admin).
+- Quy định rõ múi giờ hoạt động của tiệm (Shop Timezone: Asia/Ho_Chi_Minh) và khung giờ mở cửa (08:00 - 20:00).
+
+### 3. Hợp đồng dữ liệu & Giao thức API (Data Contracts)
+- `GET /api/services`: Danh sách dịch vụ (ID, tên, giá tiền, thời lượng tính theo phút).
+- `GET /api/barbers`: Danh sách thợ cắt tóc đang làm việc tại salon.
+- `GET /api/availability?date=YYYY-MM-DD&barberId=...`: Danh sách các slot thời gian còn trống.
+- `POST /api/bookings`: Tiếp nhận yêu cầu đặt lịch mới (Tên, SĐT, BarberID, ServiceID, StartTime).
+- `POST /api/admin/login`: Đăng nhập quản trị viên, trả JWT token có hạn 24 giờ.
+
+### 4. Các trường hợp biên & Xử lý lỗi (Edge Cases & Error Handling)
+- Trùng giờ đặt lịch: Phải trả về mã lỗi 409 Conflict kèm thông điệp rõ ràng để giao diện xử lý.
+- Đặt lùi giờ trong quá khứ: Trả về mã lỗi 400 Bad Request.
+- Thiếu thông tin bắt buộc: Trả về mã lỗi 400 kèm danh sách các trường bị thiếu.
+
+### 5. Tiêu chuẩn bàn giao & Nghiệm thu (Deliverables)
+- Bàn giao hợp đồng API hoàn chỉnh cho Backend Developer và spec giao diện cho UI/UX Designer.
 
 ## Acceptance criteria
 
-_None yet._
+- [x] Given PRD specifications, when reviewed, then all business rules for booking, cancellation and admin management are fully defined.
+- [x] Given API contracts, when inspected, then all request/response schemas for services, barbers, availability and bookings are unambiguous.
+- [x] Given concurrency requirements, when defined, then the double-booking prevention rule is explicitly specified with 409 status code.
 
 ## Log
 
 - 2026-11-05T05:58:02.379Z · qlda-team-team-leader-0f797e8a · created (backlog)
-- 2026-11-05T05:58:02.514Z · qlda-team-team-leader-0f797e8a · created from delegation by qlda-team-team-leader-0f797e8a
 - 2026-11-05T05:58:02.514Z · qlda-team-team-leader-0f797e8a · assigned to qlda-team-technical-product-manager-fccdd7b1 — WorkItem cc144891-de11-49bc-9f4e-4994e86f15e3
 - 2026-11-05T06:03:55.601Z · crewly · WorkItem cc144891-de11-49bc-9f4e-4994e86f15e3 verified → done

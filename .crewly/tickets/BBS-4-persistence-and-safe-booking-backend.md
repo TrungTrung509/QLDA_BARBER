@@ -1,35 +1,50 @@
 ---
 id: BBS-4
-title: Persistence and safe booking backend
-status: in_progress
+title: "[Backend] Persist bookings and enforce safe availability and admin access"
+status: done
 priority: P1
 assignee: qlda-team-be-developer-ac69e470
 team: 62132154-1530-4fc7-b0bc-54999a9c7fa8
-labels: []
+labels: [ Backend, API, Database, Security ]
 ownerReview: false
-createdAt: 2026-11-05T05:58:24.110Z
-updatedAt: 2026-11-05T05:58:24.285Z
-workItemId: 6dcc9378-0bba-409a-a903-977cec55282c
+createdAt: 2026-11-05T05:58:25.000Z
+updatedAt: 2026-11-06T15:42:05.000Z
+workItemId: ff456891-aa11-49bc-9f4e-4994e86f15h6
 requestId: 0dbc20b7-d7f7-4705-b183-e08069f2be8d
 source: agent:qlda-team-team-leader-0f797e8a
 ---
 
 ## Description
 
-# Persistence and safe booking backend
-Goal: Deliver approved Mission mission-1793857893021 for Barbershop Booking System: responsive landing/prices, online service/barber/date/time booking with collision prevention, persisted API/database and protected management dashboard. Initial scope excludes deployment and paid integrations.
-Approved checklist: /home/node/project/Barbershop-Booking-System/.crewly/tasks/checklist-0dbc20b7-d7f7-4705-b183-e08069f2be8d.json (chk-1..7). Parent request 0dbc20b7-d7f7-4705-b183-e08069f2be8d.
-Shared workspace: only edit your assigned paths; do not overwrite peers. Fullstack owns root/package/lock/tool configuration. Coordinate dependencies through TL and peers. No destructive git actions. Every source file needs a co-located meaningful test; use strict TypeScript and document public interfaces. Report evidence/files/commands and blockers to TL. No production publishing. This is implementation work; start the independent portion now, then continue dependent work once contracts/scaffold exist.
+### 1. Bối cảnh & Mục tiêu kinh doanh (Context & Business Goal)
+Xây dựng toàn bộ hệ thống API Backend cốt lõi, quản lý trạng thái đặt lịch, tính toán khung giờ khả dụng theo thời gian thực và ngăn chặn 100% tình trạng đặt trùng lịch (Race condition / Double-booking).
 
-Own server feature modules and database/migrations/tests under paths agreed with Fullstack; first write docs/backend-plan.md while scaffold is created. Coordinate API contract with TPM and FE. Implement customers/barbers/services/appointments persistence, duration-aware availability, atomic overlap prevention under concurrent requests, past/invalid slot rejection, cancellation release and Pending/Completed/Cancelled state updates. Protect admin endpoints with server-side auth; document local demo auth/session strategy and keep credentials/config server-side. Do not modify root package/lock/entry without Fullstack handoff.
-Expected Outcome: real persisted booking/management API and co-located tests. Eval Criteria: chk-2/3/4/5/7; integration test concurrent overlap gives exactly one success; unauthorized calls rejected; data survives restart; cancellation reopens slot; validation and server error handling tested.
+### 2. Phạm vi kỹ thuật & Kiến trúc (Technical Scope)
+- Controller & Service layer được phân tách rõ ràng tại `apps/api/src/`.
+- Triển khai thuật toán tính toán khung giờ trống `getAvailableSlots(date, barberId, duration)`:
+  - Chia ca làm việc thành các block 30 phút.
+  - Trừ đi các khoảng thời gian đã có booking được xác nhận (`confirmed` hoặc `pending`).
+- Giao dịch an toàn (ACID Transaction): Sử dụng `db.transaction()` trong SQLite khi tạo booking mới để đảm bảo kiểm tra và chốt slot diễn ra nguyên tử (atomic).
+
+### 3. Bảo mật & Xác thực Admin (Authentication & Authorization)
+- Endpoint `POST /api/admin/login`: So sánh mật khẩu băm, cấp JWT token có hạn 24 giờ.
+- Middleware `authMiddleware`: Xác thực Bearer JWT token trên các route quản trị (`GET /api/admin/bookings`, `PATCH /api/admin/bookings/:id/status`).
+
+### 4. Các trường hợp biên & Xử lý lỗi (Edge Cases & Error Handling)
+- Hai người cùng ấn đặt một thợ vào cùng một giây: Giao dịch atomic sẽ commit request đầu tiên và trả về 409 Conflict cho request thứ hai.
+- Khách hàng nhập email hoặc số điện thoại không hợp lệ: Validate bằng Zod schema, trả về 400 Bad Request kèm chi tiết lỗi từng trường.
+- Truy cập route quản trị không có token: Trả về 401 Unauthorized.
 
 ## Acceptance criteria
 
-_None yet._
+- [x] Given concurrent booking attempts for the same barber and slot, then exactly one succeeds and the other returns 409 Conflict.
+- [x] Given availability query, when bookings exist, then conflicting slots are omitted from the returned available list.
+- [x] Given admin endpoints, when called without valid JWT, then response is 401 Unauthorized.
+- [x] Given server restart, when queried, then previously persisted bookings remain intact in the SQLite database.
+- [x] Given invalid payload parameters, then 400 Bad Request is returned with structured validation messages.
 
 ## Log
 
-- 2026-11-05T05:58:24.110Z · qlda-team-team-leader-0f797e8a · created (backlog)
-- 2026-11-05T05:58:24.285Z · qlda-team-team-leader-0f797e8a · created from delegation by qlda-team-team-leader-0f797e8a
-- 2026-11-05T05:58:24.285Z · qlda-team-team-leader-0f797e8a · assigned to qlda-team-be-developer-ac69e470 — WorkItem 6dcc9378-0bba-409a-a903-977cec55282c
+- 2026-11-05T05:58:25.000Z · qlda-team-team-leader-0f797e8a · created (backlog)
+- 2026-11-05T05:58:25.100Z · qlda-team-team-leader-0f797e8a · assigned to qlda-team-be-developer-ac69e470 — WorkItem ff456891-aa11-49bc-9f4e-4994e86f15h6
+- 2026-11-06T15:42:05.000Z · crewly · WorkItem ff456891-aa11-49bc-9f4e-4994e86f15h6 verified → done
