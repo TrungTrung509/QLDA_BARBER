@@ -2,13 +2,14 @@ import request from 'supertest';
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { createApp, startServer } from './server.js';
 
 const temporaryDirectories: string[] = [];
 
 afterEach(() => {
+  vi.unstubAllEnvs();
   for (const directory of temporaryDirectories.splice(0)) rmSync(directory, { recursive: true });
 });
 
@@ -24,18 +25,24 @@ describe('API smoke test', () => {
   it('migrates the configured database and releases it when stopped', async () => {
     const directory = mkdtempSync(join(tmpdir(), 'barbershop-server-'));
     temporaryDirectories.push(directory);
-    process.env.DATABASE_PATH = join(directory, 'booking.sqlite');
-    process.env.ADMIN_USERNAME = 'local-admin';
-    process.env.ADMIN_PASSWORD = 'local-password';
-    process.env.API_PORT = '0';
+    const databasePath = join(directory, 'booking.sqlite');
+    vi.stubEnv('DATABASE_PATH', databasePath);
+    vi.stubEnv('ADMIN_USERNAME', 'local-admin');
+    vi.stubEnv('ADMIN_PASSWORD', 'local-password');
+    vi.stubEnv('API_PORT', '0');
 
     const server = startServer();
     await new Promise<void>((resolve, reject) => {
       server.on('listening', resolve);
       server.on('error', reject);
     });
-    await new Promise<void>((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));
+    const address = server.address();
+    if (address === null || typeof address === 'string') throw new Error('Missing TCP listener');
+    const response = await fetch(`http://127.0.0.1:${String(address.port)}/api/health`);
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({ status: 'ok' });
+    await new Promise<void>((resolve, reject) => server.close((error) => { if (error) reject(error); else resolve(); }));
 
-    expect(() => rmSync(process.env.DATABASE_PATH!, { force: true })).not.toThrow();
+    expect(() => { rmSync(databasePath, { force: true }); }).not.toThrow();
   });
 });
