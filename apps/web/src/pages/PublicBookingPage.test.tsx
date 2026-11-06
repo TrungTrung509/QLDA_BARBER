@@ -26,7 +26,7 @@ describe('public booking', () => {
   });
   it('never renders confirmation before create succeeds', async () => {
     render(<PublicBookingPage />);
-    await waitFor(() => expect(api.services).toHaveBeenCalled());
+    await waitFor(() => { expect(api.services).toHaveBeenCalled(); });
     expect(screen.queryByText(/Appointment .* is pending/)).not.toBeInTheDocument();
   });
   it('refreshes availability after a slot conflict without losing customer details', async () => {
@@ -45,7 +45,7 @@ describe('public booking', () => {
     fireEvent.change(screen.getByLabelText('Phone'), { target: { value: '1234567' } });
     fireEvent.click(screen.getByRole('button', { name: 'Confirm booking' }));
     expect(await screen.findByRole('alert')).toHaveTextContent('just booked');
-    await waitFor(() => expect(api.availability).toHaveBeenCalledTimes(2));
+    await waitFor(() => { expect(api.availability).toHaveBeenCalledTimes(2); });
     fireEvent.click(await screen.findByLabelText('10:00 AM'));
     fireEvent.click(screen.getByRole('button', { name: 'Continue' }));
     expect(screen.getByLabelText('Full name')).toHaveValue('Sam Customer');

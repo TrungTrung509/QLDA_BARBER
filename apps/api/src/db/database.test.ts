@@ -29,3 +29,22 @@ describe('database lifecycle', () => {
   });
 });
 
+
+it('upgrades the legacy weekday constraint without shifting existing ISO schedules or losing data', async () => {
+  const { readFileSync } = await import('node:fs');
+  const database = openDatabase(':memory:');
+  try {
+    database.exec(readFileSync(join(apiRoot, 'migrations/001_initial.sql'), 'utf8'));
+    seedDatabase(database, join(apiRoot, 'seeds'));
+    database.prepare('INSERT INTO barber_hours VALUES (?,?,?,?)').run('barber-alex', 0, 600, 900);
+    const before = database.prepare('SELECT * FROM barber_hours ORDER BY barber_id,weekday,start_minute').all() as { weekday: number }[];
+    migrateDatabase(database, join(apiRoot, 'migrations'));
+    migrateDatabase(database, join(apiRoot, 'migrations'));
+    const after = database.prepare('SELECT * FROM barber_hours ORDER BY barber_id,weekday,start_minute').all();
+    expect(after).toEqual(expect.arrayContaining(before.map((row) => ({ ...row, weekday: row.weekday === 0 ? 7 : row.weekday }))));
+    expect(after).toHaveLength(before.length);
+    expect(() => database.prepare('INSERT INTO barber_hours VALUES (?,?,?,?)').run('barber-sam', 0, 600, 900)).toThrow();
+    expect(() => database.prepare('INSERT INTO barber_hours VALUES (?,?,?,?)').run('barber-sam', 7, 600, 900)).not.toThrow();
+    expect(database.pragma('foreign_key_check')).toEqual([]);
+  } finally { database.close(); }
+});

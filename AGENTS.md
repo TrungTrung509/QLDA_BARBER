@@ -25,6 +25,47 @@ When creating, breaking down, or assigning tickets, ALL agents (especially Team 
 4. **Acceptance Criteria**: NEVER leave empty. Must specify at least 3 - 5 concrete, verifiable, and testable criteria (Given / When / Then).
 5. **Assignee**: Must assign to the specialized team member (FE Developer, BE Developer, Fullstack Developer, Tester, Designer).
 
+## Mandatory Git & GitHub Workflow (Quy trình bắt buộc làm việc qua Git & GitHub)
+
+**NGHIÊM CẤM** việc chỉnh sửa mã nguồn mà không commit và không push lên GitHub. Mọi Agent (FE, BE, Fullstack, Tester, QA, Leader) BẮT BUỘC tuân thủ nghiêm ngặt quy trình sau cho TỪNG ticket:
+
+### 1. Phân nhánh rõ ràng (Branch Strategy)
+Mỗi ticket/subtask phải được thực hiện trên một nhánh (branch) độc lập:
+- Feature: `feat/<MÃ_TICKET>-<tên-ngắn>` (Ví dụ: `feat/BBS-5-booking-ui`)
+- Bug / Hotfix: `fix/<MÃ_TICKET>-<tên-ngắn>` (Ví dụ: `fix/BBS-4-overlap-conflict`)
+- Tooling / Cấu hình: `chore/<MÃ_TICKET>-<tên-ngắn>` (Ví dụ: `chore/BBS-3-vitest-setup`)
+- Kiểm thử / QA: `test/<MÃ_TICKET>-<tên-ngắn>` (Ví dụ: `test/BBS-6-e2e-suite`)
+
+```bash
+git checkout -b <tên-branch>
+```
+
+### 2. Commit mã nguồn thường xuyên & chuẩn mực (Conventional Commits)
+- KHÔNG BAO GIỜ để file thay đổi ở trạng thái "unstaged" hoặc "untracked" khi kết thúc phiên làm việc.
+- Commit theo chuẩn Conventional Commits:
+```bash
+git add <các_file_thay_đổi>
+git commit -m "<type>(<MÃ_TICKET>): <mô tả chi tiết những gì đã thực hiện>"
+```
+
+### 3. Bắt buộc Push lên GitHub (Mandatory Git Push)
+- Ngay sau khi hoàn thành công việc và pass các bài kiểm tra cục bộ:
+```bash
+git push origin <tên-branch>
+```
+- Khi hoàn thành tính năng lớn và được review chấp thuận, tiến hành mở Pull Request hoặc merge vào `main` và push `main`:
+```bash
+git push origin main
+```
+
+### 4. Gắn liên kết Git vào Báo cáo & Group Chat
+Khi báo cáo hoàn thành bằng `post-team-chat`, PHẢI đính kèm tên branch và mã hash commit đã push lên GitHub:
+```bash
+post-team-chat --type complete --ticket <MÃ_TICKET> --to "@Team Leader @Tester" --message "Đã hoàn thành và push branch <tên-branch> lên GitHub (commit: <commit-hash>). Mời QA review."
+```
+
+---
+
 ## Mandatory Group Chat Protocol (Quy trình bắt buộc Giao tiếp trong Group Chat #general)
 
 Để đảm bảo tính minh bạch, phối hợp nhịp nhàng và giúp toàn đội ngũ theo dõi sát sao tiến độ, **TẤT CẢ CÁC AGENT BẮT BUỘC PHẢI DÙNG SKILL `post-team-chat` ĐỂ CHAT TRỰC TIẾP VÀO GROUP CHAT `#general`** trong các tình huống sau:
@@ -52,9 +93,9 @@ post-team-chat --type bug --ticket <MÃ_TICKET> --to "@<Người_Cần_Hỗ_Tr�
 ```
 
 ### 4. Khi Hoàn Thành Task & Bàn Giao Review (Task Completion & Review)
-Sau khi tự test kỹ mã nguồn, agent báo cáo hoàn thành vào group chat:
+Sau khi tự test kỹ mã nguồn và **đã `git push` lên GitHub**, agent báo cáo hoàn thành vào group chat:
 ```bash
-post-team-chat --type complete --ticket <MÃ_TICKET> --to "@Team Leader @Tester" --message "<Báo cáo kết quả công việc, file thay đổi, sẵn sàng review>"
+post-team-chat --type complete --ticket <MÃ_TICKET> --to "@Team Leader @Tester" --message "<Báo cáo kết quả công việc, branch đã push, sẵn sàng review>"
 ```
 
 ### 5. Khi Review & Nghiệm Thu (QA & Lead Review)

@@ -12,6 +12,60 @@
       "contentHash": "6263f0cf97d3eab307e0f9bfc8feb4d4f5d3f91a5c1a89008b121006080a198d",
       "targetRelativePath": "llm-curated/runbooks/agents.md",
       "migratedAt": "2026-11-05T03:46:53.894Z"
+    },
+    {
+      "sourceId": "learnings:512387a3843ce1cd",
+      "contentHash": "2199bf372746d68cb0e6d37cbf8020460e7ca50222d28db57be3e5ab2c9ec9fc",
+      "targetRelativePath": "llm-curated/log.md",
+      "migratedAt": "2026-11-06T16:57:05.721Z"
+    },
+    {
+      "sourceId": "runbook:AGENTS.md:d707b142402a",
+      "contentHash": "98caf123d7bae5593fe55da4ff1c0720543c5ea0337c7568beaf9ab420d127e6",
+      "targetRelativePath": "llm-curated/runbooks/agents-1.md",
+      "migratedAt": "2026-11-06T16:57:05.741Z"
+    },
+    {
+      "sourceId": "ccc485a1-9a4c-4672-a75b-c9f4847cc3d1",
+      "contentHash": "66a43ee82ffca32fafb3abbee81e6b6ab8ab69a819dbe126127a8952e7ff6048",
+      "targetRelativePath": "llm-curated/patterns/2026-11-06-claimed-workitem-verify-persistence-and-safe-booking-backend.md",
+      "migratedAt": "2026-11-06T16:57:05.753Z"
+    },
+    {
+      "sourceId": "6ae2e23a-61a2-4ebe-826f-333a18a80d69",
+      "contentHash": "60a560f62790f357bc76960fb4e06a0e67667d5bc57ddb79520adc2d36b2ea07",
+      "targetRelativePath": "llm-curated/patterns/2026-11-06-claimed-workitem-mission-review-x-y-d-ng-ho-n-ch-nh-h-th-ng-website-qu-n-l-v-t-l.md",
+      "migratedAt": "2026-11-06T16:57:05.768Z"
+    },
+    {
+      "sourceId": "ac468fde-bbcf-48d1-90f8-f89b71373236",
+      "contentHash": "a913638cb471b7ebbdb72614a880aa82a42fde7e3268a6c8192cff5c530e2471",
+      "targetRelativePath": "llm-curated/patterns/2026-11-06-claimed-workitem-verify-barbershop-worker-output-id-da91f0a4-a12c-4618-9037-4535.md",
+      "migratedAt": "2026-11-06T16:57:05.782Z"
+    },
+    {
+      "sourceId": "51a84317-4b28-4190-ab44-ebee6f1f786b",
+      "contentHash": "9327f000e031359c878e5011894dca656961b49b862670b662a4e668d250bbf2",
+      "targetRelativePath": "llm-curated/patterns/2026-11-06-claimed-workitem-migrate-4-legacy-wiki-item-s-barbershop-booking-system-id-d8516.md",
+      "migratedAt": "2026-11-06T16:57:05.796Z"
+    },
+    {
+      "sourceId": "learnings:1bb28728ffef83ba",
+      "contentHash": "0c793a440cd63cf64077f79ff2fe8a79e2ee563474512bc7aa6f479f8ef9ecf4",
+      "targetRelativePath": "llm-curated/log.md",
+      "migratedAt": "2026-11-06T17:13:59.040Z"
+    },
+    {
+      "sourceId": "63d51ac9-8e41-4160-a091-0a66ae73a471",
+      "contentHash": "e94de993479e13c8cd8a51117379372f50e3b31b59ecd16b9b47f2efade3b80f",
+      "targetRelativePath": "llm-curated/patterns/2026-11-06-bbs-5-current-booking-implementation-is-publicbookingpage.md",
+      "migratedAt": "2026-11-06T17:13:59.051Z"
+    },
+    {
+      "sourceId": "67f3af8d-6b17-43a7-974f-fa7bfcead27b",
+      "contentHash": "5ae62202485aa968e97f191e193ae800cae6da0ebd3c56825eaa5c7f421c3ff8",
+      "targetRelativePath": "llm-curated/patterns/2026-11-06-bbs-5-qa-created.md",
+      "migratedAt": "2026-11-06T17:13:59.059Z"
     }
   ]
 }

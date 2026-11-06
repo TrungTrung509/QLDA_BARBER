@@ -1,0 +1,17 @@
+{
+  "modules": [
+    {
+      "path": "/src/main.tsx",
+      "status": 200
+    },
+    {
+      "path": "/@vite/client",
+      "status": 200
+    }
+  ],
+  "heading": [
+    "Example Barbershop"
+  ],
+  "pageErrors": [],
+  "serverFailures": []
+}

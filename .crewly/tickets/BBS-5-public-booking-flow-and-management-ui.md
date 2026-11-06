@@ -1,15 +1,15 @@
 ---
 id: BBS-5
 title: "[Frontend] Complete responsive booking and protected management flows"
-status: done
+status: in_progress
 priority: P1
 assignee: qlda-team-fe-developer-690d736f
 team: 62132154-1530-4fc7-b0bc-54999a9c7fa8
 labels: [ Frontend, UI, React, BookingFlow ]
 ownerReview: false
 createdAt: 2026-11-05T05:58:30.000Z
-updatedAt: 2026-11-06T15:42:10.000Z
-workItemId: 00566891-bb11-49bc-9f4e-4994e86f15i7
+updatedAt: 2026-11-06T17:13:02.362Z
+workItemId: 6553a3b8-fbca-48be-94bd-8e7371cae0d7
 requestId: 0dbc20b7-d7f7-4705-b183-e08069f2be8d
 source: agent:qlda-team-team-leader-0f797e8a
 ---
@@ -49,3 +49,5 @@ Hiện thực hóa toàn bộ giao diện đặt lịch cho khách hàng và b�
 - 2026-11-05T05:58:30.000Z · qlda-team-team-leader-0f797e8a · created (backlog)
 - 2026-11-05T05:58:30.100Z · qlda-team-team-leader-0f797e8a · assigned to qlda-team-fe-developer-690d736f — WorkItem 00566891-bb11-49bc-9f4e-4994e86f15i7
 - 2026-11-06T15:42:10.000Z · crewly · WorkItem 00566891-bb11-49bc-9f4e-4994e86f15i7 verified → done
+- 2026-11-06T17:12:50.604Z · qlda-team-team-leader-0f797e8a · done → ready — Reopen stale done state during current TL review 6553a3b8-fbca-48be-94bd-8e7371cae0d7:verify:6553a3b8-fbca-48be-94bd-8e7371cae0d7. Source checks pass so far; responsive/keyboard browser evidence pending QA. Do not create duplicate work.
+- 2026-11-06T17:13:02.362Z · qlda-team-team-leader-0f797e8a · linked to WorkItem 6553a3b8-fbca-48be-94bd-8e7371cae0d7 (done_by_worker, qlda-team-fe-developer-690d736f) by qlda-team-team-leader-0f797e8a

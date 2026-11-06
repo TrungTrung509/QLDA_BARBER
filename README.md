@@ -17,7 +17,7 @@ Local-first, single-shop appointment booking with a React frontend, Node API, an
 
 The web app runs at `http://127.0.0.1:5173`; the API runs at `http://127.0.0.1:3001`, with health at `/api/health`.
 
-Migration and seed implementations are owned by the backend slice. Until those files land, the corresponding commands fail explicitly instead of reporting a false success.
+Root commands load `.env`; database paths are relative to the repository root. Run commands from that directory. If dependencies were copied from another OS or Node version and SQLite reports an invalid native binary, run `npm rebuild better-sqlite3`.
 
 ## Commands
 
@@ -48,12 +48,12 @@ Every source module must have a meaningful co-located test. Public interfaces re
 
 ## MVP assumptions
 
-- The system serves one shop using the configured IANA `SHOP_TIMEZONE`.
+- The system serves one shop using the IANA timezone stored in `shop_settings` (demo seed: `UTC`).
 - Weekly barber hours control availability; timestamps cross the API as ISO 8601 UTC instants.
 - Appointment intervals are half-open: `[start, end)`.
 - Pending and Completed appointments block capacity; Cancelled appointments release it.
 - The API derives service duration and price snapshots instead of trusting client values.
 - Local demo admin credentials are read only by the API through `ADMIN_USERNAME` and `ADMIN_PASSWORD`. Never expose passwords through `VITE_*` variables.
-- Opening hours, cancellation policy, and the demo account are populated by backend seed data and should be changed locally rather than committed as secrets.
+- Demo shop and barber hours are Monday–Saturday, 09:00–17:00 UTC, with 30-minute slots; Sunday is closed. Seed data contains no admin password. Choose `ADMIN_USERNAME` and `ADMIN_PASSWORD` in `.env` and use those values on the management login. `VITE_API_URL` is the API origin without `/api`; the client adds the route prefix.
 
 See `.crewly/specs/requirements.md` and `.crewly/specs/api-contract.md` for the final product and API contract once published.

@@ -1,17 +1,22 @@
+import { waitForApi } from './readiness';
 import { expect, test, type APIRequestContext } from '@playwright/test';
 import fixture from './fixtures/booking.json' with { type: 'json' };
 
 const apiUrl = process.env.E2E_API_URL ?? 'http://127.0.0.1:3001/api';
 
-interface BookingInput {
+type BookingInput = {
   readonly serviceId: string;
   readonly barberId: string;
   readonly startAt: string;
   readonly customer: typeof fixture.customer;
-}
+};
 
 async function createBooking(request: APIRequestContext, input: BookingInput) {
-  return request.post(`${apiUrl}/appointments`, { data: input });
+  const projectOffset = test.info().project.name.includes('mobile') ? 7 : 0;
+  const instant = new Date(input.startAt);
+  if (Number.isFinite(instant.getTime())) instant.setUTCDate(instant.getUTCDate() + projectOffset);
+  const startAt = Number.isFinite(instant.getTime()) ? instant.toISOString() : input.startAt;
+  return request.post(`${apiUrl}/appointments`, { data: { ...input, startAt } });
 }
 
 test.describe('booking API capacity and validation', () => {
@@ -79,7 +84,7 @@ test.describe('booking API capacity and validation', () => {
     const username = process.env.E2E_ADMIN_USERNAME;
     const password = process.env.E2E_ADMIN_PASSWORD;
     test.skip(!username || !password, 'E2E admin credentials are required');
-    const login = await request.post(`${apiUrl}/auth/login`, { data: { username, password } });
+    const login = await request.post(`${apiUrl}/auth/login`, { headers: { origin: process.env.PLAYWRIGHT_BASE_URL ?? 'http://127.0.0.1:5173' }, data: { username, password } });
     expect(login.status()).toBe(204);
 
     const created = await createBooking(request, {
@@ -93,7 +98,7 @@ test.describe('booking API capacity and validation', () => {
     const appointment = createdBody.data.appointment;
 
     const cancelled = await request.patch(`${apiUrl}/admin/appointments/${appointment.id}/status`, {
-      data: { status: 'Cancelled' },
+      headers: { origin: process.env.PLAYWRIGHT_BASE_URL ?? 'http://127.0.0.1:5173' }, data: { status: 'CANCELLED' },
     });
     expect(cancelled.ok()).toBe(true);
 
@@ -131,7 +136,7 @@ test.describe('booking API capacity and validation', () => {
     });
     expect(nonexistent.status()).toBe(200);
     const nonexistentBody = (await nonexistent.json()) as {
-      readonly data: { readonly slots: ReadonlyArray<{ readonly localStart: string }> };
+      readonly data: { readonly slots: readonly { readonly localStart: string }[] };
     };
     expect(nonexistentBody.data.slots.some((slot) =>
       slot.localStart.includes(`T${fixture.dst.nonexistentLocalTime}`))).toBe(false);
@@ -145,7 +150,7 @@ test.describe('booking API capacity and validation', () => {
     });
     expect(ambiguous.status()).toBe(200);
     const ambiguousBody = (await ambiguous.json()) as {
-      readonly data: { readonly slots: ReadonlyArray<{ readonly localStart: string }> };
+      readonly data: { readonly slots: readonly { readonly localStart: string }[] };
     };
     const repeatedLabels = ambiguousBody.data.slots
       .filter((slot) => slot.localStart.includes(`T${fixture.dst.ambiguousLocalTime}`))
@@ -154,3 +159,5 @@ test.describe('booking API capacity and validation', () => {
   });
 });
 
+
+test.beforeEach(async ({ request }) => { await waitForApi(request); });

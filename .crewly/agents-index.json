@@ -3,12 +3,12 @@
     {
       "agentId": "qlda-team-team-leader-0f797e8a",
       "role": "team-leader",
-      "lastActive": "2026-11-05T09:49:17.372Z"
+      "lastActive": "2026-11-06T18:28:05.658Z"
     },
     {
       "agentId": "qlda-team-technical-product-manager-fccdd7b1",
       "role": "tpm",
-      "lastActive": "2026-11-05T05:46:50.060Z"
+      "lastActive": "2026-11-06T17:24:53.118Z"
     },
     {
       "agentId": "qlda-team-ui/ux-designer-5aa73d27",
@@ -18,22 +18,27 @@
     {
       "agentId": "qlda-team-fullstack-developer-b16830a5",
       "role": "fullstack-dev",
-      "lastActive": "2026-11-05T09:34:25.006Z"
+      "lastActive": "2026-11-06T18:15:57.434Z"
     },
     {
       "agentId": "qlda-team-fe-developer-690d736f",
       "role": "frontend-developer",
-      "lastActive": "2026-11-05T09:38:39.897Z"
+      "lastActive": "2026-11-06T17:06:28.522Z"
     },
     {
       "agentId": "qlda-team-be-developer-ac69e470",
       "role": "backend-developer",
-      "lastActive": "2026-11-05T05:46:51.821Z"
+      "lastActive": "2026-11-06T16:56:39.765Z"
     },
     {
       "agentId": "qlda-team-tester-3e1b565d",
       "role": "qa",
-      "lastActive": "2026-11-05T05:46:52.262Z"
+      "lastActive": "2026-11-06T18:28:00.545Z"
+    },
+    {
+      "agentId": "qlda-team-ui-ux-designer-5aa73d27",
+      "role": "designer",
+      "lastActive": "2026-11-06T17:24:54.119Z"
     }
   ]
 }

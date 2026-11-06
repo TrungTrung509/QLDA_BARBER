@@ -28,8 +28,8 @@ export function PublicBookingPage(): React.JSX.Element {
   useEffect(() => {
     Promise.all([api.shop(), api.services()])
       .then(([nextShop, nextServices]) => { setShop(nextShop); setServices(nextServices); })
-      .catch(() => setError('We could not load services. Please try again.'))
-      .finally(() => setLoading(false));
+      .catch(() => { setError('We could not load services. Please try again.'); })
+      .finally(() => { setLoading(false); });
   }, []);
 
   function move(next: Step): void {
@@ -44,16 +44,23 @@ export function PublicBookingPage(): React.JSX.Element {
     finally { setLoading(false); }
   }
 
-  async function loadSlots(): Promise<void> {
-    setLoading(true); setError('');
-    try { setSlots((await api.availability(serviceId, barberId, date)).slots); }
-    catch { setError('We could not load available times. Please try again.'); }
-    finally { setLoading(false); }
-  }
+  useEffect(() => {
+    if (step !== 'time' || !serviceId || !barberId || !date) return;
+    const controller = new AbortController();
+    const isActive = (): boolean => !controller.signal.aborted;
+    void Promise.resolve().then(async () => {
+      if (!isActive()) return;
+      setLoading(true); setError('');
+      try {
+        const result = await api.availability(serviceId, barberId, date);
+        if (isActive()) setSlots(result.slots);
+      } catch { if (isActive()) setError('We could not load available times. Please try again.'); }
+      finally { if (isActive()) setLoading(false); }
+    });
+    return () => { controller.abort(); };
+  }, [step, serviceId, barberId, date]);
 
-  useEffect(() => { if (step === 'time' && serviceId && barberId && date) void loadSlots(); }, [step, serviceId, barberId, date]);
-
-  async function submit(event: React.FormEvent<HTMLFormElement>): Promise<void> {
+  async function submit(event: React.SyntheticEvent<HTMLFormElement>): Promise<void> {
     event.preventDefault(); setSubmitting(true); setError('');
     try {
       const appointment = await api.createAppointment({ serviceId, barberId, startAt, customer: {
@@ -82,10 +89,10 @@ export function PublicBookingPage(): React.JSX.Element {
     <section id="booking" className="booking-panel" aria-labelledby="step-heading"><p className="progress">{step === 'confirmed' ? 'Booking complete' : `Booking: ${step}`}</p><h2 id="step-heading" ref={stepHeading} tabIndex={-1}>{step === 'service' ? 'Choose a service' : step === 'barber' ? 'Choose a barber' : step === 'date' ? 'Choose a date' : step === 'time' ? 'Choose an available time' : step === 'details' ? 'Your details' : 'You’re booked'}</h2>
       {error && (services.length > 0 || step !== 'service') && <div className="notice error" role="alert">{error}</div>}{conflict && <div className="notice warning" role="alert">{conflict}</div>}
       {step === 'service' && <div className="options">{services.map((service) => <button className="option" key={service.id} onClick={() => void chooseService(service.id)}>{service.name} · {formatMoney(service.priceMinor, service.currency)}</button>)}</div>}
-      {step === 'barber' && (loading ? <p role="status">Loading barbers…</p> : barbers.length === 0 ? <><p>No barbers are available for that service.</p><button onClick={() => move('service')}>Choose another service</button></> : <fieldset><legend>Available barbers</legend><div className="options">{barbers.map((barber) => <label className="option" key={barber.id}><input type="radio" name="barber" checked={barberId === barber.id} onChange={() => { setBarberId(barber.id); setDate(''); setStartAt(''); }} />{barber.name}</label>)}</div><button disabled={!barberId} onClick={() => move('date')}>Continue</button></fieldset>)}
-      {step === 'date' && <><label className="field">Appointment date<input type="date" value={date} min={new Date().toISOString().slice(0, 10)} onChange={(event) => { setDate(event.target.value); setStartAt(''); }} /></label><p>Times shown in {shop?.timezone ?? 'the shop timezone'}.</p><button disabled={!date} onClick={() => move('time')}>Find times</button></>}
-      {step === 'time' && (loading ? <p role="status">Loading available times…</p> : slots.length === 0 ? <><p>No times remain for this date.</p><button onClick={() => move('date')}>Choose another date</button></> : <fieldset><legend>Available times for {date}</legend><div className="slot-grid">{slots.map((slot) => <label className="option" key={slot.startAt}><input type="radio" name="slot" checked={startAt === slot.startAt} onChange={() => setStartAt(slot.startAt)} />{formatLocalTime(slot.localStart)}</label>)}</div><button disabled={!startAt} onClick={() => move('details')}>Continue</button></fieldset>)}
-      {step === 'details' && <form onSubmit={(event) => void submit(event)}><p>{selectedService?.name} with {selectedBarber?.name}</p><label className="field">Full name<input required maxLength={120} autoComplete="name" value={customer.name} onChange={(event) => setCustomer({ ...customer, name: event.target.value })} /></label><label className="field">Phone<input required minLength={5} maxLength={30} autoComplete="tel" value={customer.phone} onChange={(event) => setCustomer({ ...customer, phone: event.target.value })} /></label><label className="field">Email (optional)<input type="email" maxLength={254} autoComplete="email" value={customer.email} onChange={(event) => setCustomer({ ...customer, email: event.target.value })} /></label><button disabled={submitting}>{submitting ? 'Booking…' : 'Confirm booking'}</button></form>}
+      {step === 'barber' && (loading ? <p role="status">Loading barbers…</p> : barbers.length === 0 ? <><p>No barbers are available for that service.</p><button onClick={() => { move('service'); }}>Choose another service</button></> : <fieldset><legend>Available barbers</legend><div className="options">{barbers.map((barber) => <label className="option" key={barber.id}><input type="radio" name="barber" checked={barberId === barber.id} onChange={() => { setBarberId(barber.id); setDate(''); setStartAt(''); }} />{barber.name}</label>)}</div><button disabled={!barberId} onClick={() => { move('date'); }}>Continue</button></fieldset>)}
+      {step === 'date' && <><label className="field">Appointment date<input type="date" value={date} min={new Date().toISOString().slice(0, 10)} onChange={(event) => { setDate(event.target.value); setStartAt(''); }} /></label><p>Times shown in {shop?.timezone ?? 'the shop timezone'}.</p><button disabled={!date} onClick={() => { move('time'); }}>Find times</button></>}
+      {step === 'time' && (loading ? <p role="status">Loading available times…</p> : slots.length === 0 ? <><p>No times remain for this date.</p><button onClick={() => { move('date'); }}>Choose another date</button></> : <fieldset><legend>Available times for {date}</legend><div className="slot-grid">{slots.map((slot) => <label className="option" key={slot.startAt}><input type="radio" name="slot" checked={startAt === slot.startAt} onChange={() => { setStartAt(slot.startAt); }} />{formatLocalTime(slot.localStart)}</label>)}</div><button disabled={!startAt} onClick={() => { move('details'); }}>Continue</button></fieldset>)}
+      {step === 'details' && <form onSubmit={(event) => void submit(event)}><p>{selectedService?.name} with {selectedBarber?.name}</p><label className="field">Full name<input required maxLength={120} autoComplete="name" value={customer.name} onChange={(event) => { setCustomer({ ...customer, name: event.target.value }); }} /></label><label className="field">Phone<input required minLength={5} maxLength={30} autoComplete="tel" value={customer.phone} onChange={(event) => { setCustomer({ ...customer, phone: event.target.value }); }} /></label><label className="field">Email (optional)<input type="email" maxLength={254} autoComplete="email" value={customer.email} onChange={(event) => { setCustomer({ ...customer, email: event.target.value }); }} /></label><button disabled={submitting}>{submitting ? 'Booking…' : 'Confirm booking'}</button></form>}
       {step === 'confirmed' && confirmation && <div className="notice success"><p><strong>Appointment {confirmation.id}</strong> is {confirmation.status.toLowerCase()}.</p><p>{confirmation.service.name} with {confirmation.barber.name}</p><p>{formatLocalTime(confirmation.localStart)}–{formatLocalTime(confirmation.localEnd)} · {confirmation.timezone}</p><p>{confirmation.service.durationMinutes} minutes · {formatMoney(confirmation.service.priceMinor, confirmation.service.currency)}</p></div>}
     </section>
   </>;

@@ -1,3 +1,4 @@
+import { waitForApi } from './readiness';
 import { expect, test } from '@playwright/test';
 
 const apiUrl = process.env.E2E_API_URL ?? 'http://127.0.0.1:3001/api';
@@ -15,7 +16,7 @@ test.describe('management authorization and input validation', () => {
   });
 
   test('rejects malformed booking input with a safe client error', async ({ request }) => {
-    const response = await request.post(`${apiUrl}/bookings`, {
+    const response = await request.post(`${apiUrl}/appointments`, {
       data: { serviceId: {}, barberId: '../admin', date: 'not-a-date', time: '99:99', customer: null },
     });
     expect(response.status()).toBeGreaterThanOrEqual(400);
@@ -34,7 +35,7 @@ test.describe('management authorization and input validation', () => {
     const username = process.env.E2E_ADMIN_USERNAME;
     const password = process.env.E2E_ADMIN_PASSWORD;
     test.skip(!username || !password, 'E2E admin credentials are required');
-    const login = await request.post(`${apiUrl}/auth/login`, { data: { username, password } });
+    const login = await request.post(`${apiUrl}/auth/login`, { headers: { origin: process.env.PLAYWRIGHT_BASE_URL ?? 'http://127.0.0.1:5173' }, data: { username, password } });
     expect(login.status()).toBe(204);
 
     const response = await request.patch(`${apiUrl}/admin/appointments/nonexistent/status`, {
@@ -46,3 +47,5 @@ test.describe('management authorization and input validation', () => {
   });
 });
 
+
+test.beforeEach(async ({ request }) => { await waitForApi(request); });

@@ -42,7 +42,7 @@ export function startServer(): ReturnType<Express['listen']> {
     database,
     config: { adminUsername, adminPassword, allowedOrigin, secureCookies: process.env.NODE_ENV === 'production' },
   }).listen(port, host, () => {
-    console.log(`API listening at http://${host}:${port}`);
+    console.log(`API listening at http://${host}:${String(port)}`);
   });
   server.on('close', () => database.close());
   for (const signal of ['SIGINT', 'SIGTERM'] as const) {

@@ -1,5 +1,5 @@
 /** Canonical machine-readable API error returned by the server. */
-export interface ApiFailure {
+export type ApiFailure = {
   readonly code: string;
   readonly message: string;
   readonly fields?: Readonly<Record<string, string>>;
@@ -16,13 +16,13 @@ export class ApiRequestError extends Error {
   }
 }
 
-export interface Shop {
+export type Shop = {
   readonly name: string;
   readonly timezone: string;
   readonly currency: string;
 }
 
-export interface Service {
+export type Service = {
   readonly id: string;
   readonly name: string;
   readonly description: string | null;
@@ -31,20 +31,20 @@ export interface Service {
   readonly currency: string;
 }
 
-export interface Barber {
+export type Barber = {
   readonly id: string;
   readonly name: string;
   readonly bio: string | null;
 }
 
-export interface Slot {
+export type Slot = {
   readonly startAt: string;
   readonly endAt: string;
   readonly localStart: string;
   readonly localEnd: string;
 }
 
-export interface AppointmentSummary {
+export type AppointmentSummary = {
   readonly id: string;
   readonly status: 'PENDING' | 'COMPLETED' | 'CANCELLED';
   readonly service: Service;
@@ -56,7 +56,7 @@ export interface AppointmentSummary {
   readonly localEnd: string;
 }
 
-export interface AdminAppointment extends AppointmentSummary {
+export type AdminAppointment = {
   readonly customer: {
     readonly id: string;
     readonly name: string;
@@ -64,18 +64,18 @@ export interface AdminAppointment extends AppointmentSummary {
     readonly email: string | null;
   };
   readonly createdAt: string;
-}
+} & AppointmentSummary
 
 const configuredOrigin = import.meta.env.VITE_API_URL as string | undefined;
 const apiOrigin = configuredOrigin?.replace(/\/$/, '') ?? '';
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
+  const headers = new Headers(init?.headers);
+  if (init?.body && !headers.has('Content-Type')) headers.set('Content-Type', 'application/json');
   const response = await fetch(`${apiOrigin}${path}`, {
     credentials: 'include',
     ...init,
-    ...(init?.body
-      ? { headers: { 'Content-Type': 'application/json', ...init.headers } }
-      : init?.headers ? { headers: init.headers } : {}),
+    headers,
   });
 
   if (!response.ok) {
@@ -135,9 +135,10 @@ export function formatMoney(priceMinor: number, currency: string): string {
 
 /** Formats a server-provided offset timestamp without using the browser timezone. */
 export function formatLocalTime(localInstant: string): string {
-  const time = localInstant.match(/T(\d{2}):(\d{2})/)?.slice(1);
+  const time = (/T(\d{2}):(\d{2})/.exec(localInstant))?.slice(1);
   if (!time) return localInstant;
   const [hourText, minute] = time;
+  if (hourText === undefined || minute === undefined) return localInstant;
   const hour = Number(hourText);
-  return `${hour % 12 || 12}:${minute} ${hour >= 12 ? 'PM' : 'AM'}`;
+  return `${String(hour % 12 || 12)}:${minute} ${hour >= 12 ? 'PM' : 'AM'}`;
 }
