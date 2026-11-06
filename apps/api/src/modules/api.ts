@@ -1,4 +1,5 @@
 import type Database from 'better-sqlite3';
+import { DateTime } from 'luxon';
 import type { Express, NextFunction, Request, Response } from 'express';
 import { createHash, randomBytes, randomUUID, timingSafeEqual } from 'node:crypto';
 import { z } from 'zod';
@@ -57,7 +58,7 @@ const bookingSchema = z.object({
     email: z.email().max(254).nullable().optional(),
   }).strict(),
 }).strict();
-const loginSchema = z.object({ username: z.string().min(1), password: z.string().min(1) }).strict();
+const loginSchema = z.object({ username: z.string().trim().min(1).max(120), password: z.string().min(1).max(256) }).strict();
 const statusSchema = z.object({ status: z.enum(['COMPLETED', 'CANCELLED']) }).strict();
 const adminQuerySchema = z.object({
   status: z.enum(['PENDING', 'COMPLETED', 'CANCELLED']).optional(),
@@ -109,22 +110,16 @@ function localParts(instant: Date, timezone: string): { date: string; minute: nu
   const date = `${get('year')}-${get('month')}-${get('day')}`;
   const minute = Number(get('hour')) * 60 + Number(get('minute'));
   const weekdays: Record<string, number> = { Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6, Sun: 7 };
-  return { date, minute, weekday: weekdays[get('weekday')] ?? 0, label: `${date}T${get('hour')}:${get('minute')}` };
+  return { date, minute, weekday: weekdays[get('weekday')] ?? 0, label: DateTime.fromJSDate(instant, { zone: timezone }).toISO({ suppressSeconds: true, suppressMilliseconds: true })! };
 }
 
 function localCandidates(date: string, minute: number, timezone: string): Date[] {
-  const [year = 0, month = 0, day = 0] = date.split('-').map(Number);
-  const nominal = Date.UTC(year, month - 1, day, Math.floor(minute / 60), minute % 60);
-  const matches: Date[] = [];
-  for (let offset = -14 * 60; offset <= 14 * 60; offset += 15) {
-    const candidate = new Date(nominal - offset * 60_000);
-    const local = localParts(candidate, timezone);
-    if (local.date === date && local.minute === minute && !matches.some((item) => item.getTime() === candidate.getTime())) matches.push(candidate);
-  }
-  return matches;
+  const local = DateTime.fromISO(`${date}T${minuteLabel(minute)}`, { zone: timezone });
+  if (!local.isValid || local.toFormat('yyyy-MM-dd') !== date || local.hour * 60 + local.minute !== minute) return [];
+  return local.getPossibleOffsets().map((candidate) => candidate.toJSDate());
 }
 
-function offeredSlots(database: Database.Database, serviceRow: ServiceRow, barberRow: BarberRow, date: string, now: Date) {
+function offeredSlots(database: Database.Database, serviceRow: ServiceRow, barberRow: BarberRow, date: string, now: Date, includeBlocked = false) {
   const settings = shop(database);
   const probe = localCandidates(date, 720, settings.timezone)[0];
   if (!probe) return [];
@@ -144,7 +139,9 @@ function offeredSlots(database: Database.Database, serviceRow: ServiceRow, barbe
       if (starts.length !== 1 || starts[0]!.getTime() < earliest) continue;
       const start = starts[0]!;
       const end = new Date(start.getTime() + serviceRow.duration_minutes * 60_000);
-      if (localParts(end, settings.timezone).date !== date || blocking.some((item) => Date.parse(item.start_at) < end.getTime() && Date.parse(item.end_at) > start.getTime())) continue;
+      const localEnd = localParts(end, settings.timezone);
+      if (localEnd.date !== date || localEnd.minute !== minute + serviceRow.duration_minutes || localCandidates(date, localEnd.minute, settings.timezone).length !== 1) continue;
+      if (!includeBlocked && blocking.some((item) => Date.parse(item.start_at) < end.getTime() && Date.parse(item.end_at) > start.getTime())) continue;
       slots.push({ startAt: start.toISOString(), endAt: end.toISOString(), localStart: localParts(start, settings.timezone).label, localEnd: localParts(end, settings.timezone).label });
     }
   }
@@ -153,7 +150,7 @@ function offeredSlots(database: Database.Database, serviceRow: ServiceRow, barbe
 
 function originGuard(config: ApiConfig, request: Request): void {
   const origin = request.headers.origin;
-  if (origin && origin !== config.allowedOrigin) throw new ApiFailure(403, 'FORBIDDEN', 'Origin is not allowed');
+  if (origin !== config.allowedOrigin) throw new ApiFailure(403, 'FORBIDDEN', 'Origin is not allowed');
 }
 
 function errorMiddleware(error: unknown, _request: Request, response: Response, _next: NextFunction): void {
@@ -196,6 +193,7 @@ export function registerApiRoutes(app: Express, dependencies: ApiDependencies): 
     response.json({ data: { barbers: rows } });
   });
   app.get('/api/availability', (request, response) => {
+    if (!z.iso.date().safeParse(request.query.date).success) throw new ApiFailure(422, 'INVALID_DATE', 'A valid calendar date is required');
     const query = querySchema.parse(request.query);
     const serviceRow = service(database, query.serviceId);
     const barberRow = barber(database, query.barberId);
@@ -211,6 +209,14 @@ export function registerApiRoutes(app: Express, dependencies: ApiDependencies): 
       if (start.getTime() <= now().getTime()) throw new ApiFailure(422, 'PAST_SLOT', 'Appointment must be in the future');
       const settings = shop(database);
       const date = localParts(start, settings.timezone).date;
+      const local = localParts(start, settings.timezone);
+      if (start.getUTCSeconds() !== 0 || start.getUTCMilliseconds() !== 0 || localCandidates(date, local.minute, settings.timezone).length !== 1) throw new ApiFailure(422, 'INVALID_TIME', 'Invalid local appointment time');
+      const intervals = database.prepare(`SELECT MAX(b.start_minute,s.start_minute) start_minute, MIN(b.end_minute,s.end_minute) end_minute FROM barber_hours b JOIN shop_hours s ON s.weekday=b.weekday WHERE b.barber_id=? AND b.weekday=?`).all(barberRow.id, local.weekday) as Array<{ start_minute: number; end_minute: number }>;
+      const interval = intervals.find((item) => local.minute >= item.start_minute && local.minute + serviceRow.duration_minutes <= item.end_minute);
+      if (!interval) throw new ApiFailure(422, 'OUTSIDE_WORKING_HOURS', 'Appointment must fit working hours');
+      if ((local.minute - interval.start_minute) % settings.slot_interval_minutes !== 0) throw new ApiFailure(422, 'INVALID_TIME', 'Appointment must align with a slot');
+      const valid = offeredSlots(database, serviceRow, barberRow, date, now(), true).find((item) => item.startAt === start.toISOString());
+      if (!valid) throw new ApiFailure(422, 'INVALID_TIME', 'Appointment time is not bookable');
       const slot = offeredSlots(database, serviceRow, barberRow, date, now()).find((item) => item.startAt === start.toISOString());
       if (!slot) throw new ApiFailure(409, 'SLOT_UNAVAILABLE', 'The selected slot is no longer available');
       const timestamp = now().toISOString();
@@ -262,11 +268,15 @@ export function registerApiRoutes(app: Express, dependencies: ApiDependencies): 
   app.patch('/api/admin/appointments/:appointmentId/status', authenticate, (request, response) => {
     originGuard(config, request);
     const body = statusSchema.parse(request.body);
+    const transition = database.transaction(() => {
     const current = database.prepare('SELECT status FROM appointments WHERE id = ?').get(request.params.appointmentId) as { status: Status } | undefined;
     if (!current) throw new ApiFailure(404, 'APPOINTMENT_NOT_FOUND', 'Appointment was not found');
     if (current.status !== 'PENDING' && current.status !== body.status) throw new ApiFailure(409, 'INVALID_STATUS_TRANSITION', 'Status transition is not allowed');
+    if (current.status === body.status) return;
     const timestamp = now().toISOString();
     database.prepare(`UPDATE appointments SET status=?, updated_at=?, cancelled_at=?, completed_at=? WHERE id=?`).run(body.status, timestamp, body.status === 'CANCELLED' ? timestamp : null, body.status === 'COMPLETED' ? timestamp : null, request.params.appointmentId);
+    });
+    transition.immediate();
     response.json({ data: { appointment: { id: request.params.appointmentId, status: body.status } } });
   });
   app.use(errorMiddleware);
