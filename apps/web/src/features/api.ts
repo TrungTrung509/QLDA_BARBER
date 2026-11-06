@@ -67,9 +67,9 @@ export interface AdminAppointment extends AppointmentSummary {
 }
 
 const configuredOrigin = import.meta.env.VITE_API_URL as string | undefined;
-const apiOrigin = configuredOrigin?.replace(/\/$/, '') ?? '';
+const apiOrigin = configuredOrigin?.replace(/\/$/, '').replace(/\/api$/, '') ?? '';
 
-async function request<T>(path: string, init?: RequestInit): Promise<T> {
+async function request<T>(path: string, init?: RequestInit, expectedStatus?: number): Promise<T> {
   const response = await fetch(`${apiOrigin}${path}`, {
     credentials: 'include',
     ...init,
@@ -86,6 +86,10 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
       code: 'INTERNAL_ERROR',
       message: 'Something went wrong. Please try again.',
     });
+  }
+
+  if (expectedStatus !== undefined && response.status !== expectedStatus) {
+    throw new ApiRequestError(response.status, { code: 'INVALID_RESPONSE', message: 'The server did not confirm this operation. Please try again.' });
   }
 
   if (response.status === 204) return undefined as T;
@@ -112,15 +116,15 @@ export const api = {
   }): Promise<AppointmentSummary> =>
     (await request<{ appointment: AppointmentSummary }>('/api/appointments', {
       method: 'POST', body: JSON.stringify(body),
-    })).appointment,
+    }, 201)).appointment,
   session: (): Promise<{ admin: { id: string; username: string; role: string } }> => request('/api/auth/session'),
   login: (username: string, password: string): Promise<void> => request('/api/auth/login', {
     method: 'POST', body: JSON.stringify({ username, password }),
   }),
   logout: (): Promise<void> => request('/api/auth/logout', { method: 'POST' }),
-  appointments: async (filters: { status?: string; date?: string; barberId?: string }): Promise<readonly AdminAppointment[]> => {
+  appointments: async (filters: { status?: string; date?: string; barberId?: string; page?: string }): Promise<{ appointments: readonly AdminAppointment[]; pagination: { page: number; totalPages: number; total: number }; timezone: string }> => {
     const query = new URLSearchParams(Object.entries(filters).filter((entry): entry is [string, string] => Boolean(entry[1])));
-    return (await request<{ appointments: AdminAppointment[] }>(`/api/admin/appointments?${query}`)).appointments;
+    return request(`/api/admin/appointments?${query}`);
   },
   updateStatus: (id: string, status: 'COMPLETED' | 'CANCELLED'): Promise<AdminAppointment> =>
     request(`/api/admin/appointments/${encodeURIComponent(id)}/status`, {
@@ -130,7 +134,9 @@ export const api = {
 
 /** Formats minor currency units without assuming a particular currency precision. */
 export function formatMoney(priceMinor: number, currency: string): string {
-  return new Intl.NumberFormat(undefined, { style: 'currency', currency }).format(priceMinor / 100);
+  const formatter = new Intl.NumberFormat(undefined, { style: 'currency', currency });
+  const digits = formatter.resolvedOptions().maximumFractionDigits ?? 2;
+  return formatter.format(priceMinor / 10 ** digits);
 }
 
 /** Formats a server-provided offset timestamp without using the browser timezone. */
