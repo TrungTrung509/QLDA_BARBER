@@ -16,39 +16,38 @@ source: agent:qlda-team-team-leader-0f797e8a
 
 ## Description
 
-# Application scaffold and local development foundation
-Goal: Deliver approved Mission mission-1793857893021 for Barbershop Booking System: responsive landing/prices, online service/barber/date/time booking with collision prevention, persisted API/database and protected management dashboard. Initial scope excludes deployment and paid integrations.
-Approved checklist: /home/node/project/Barbershop-Booking-System/.crewly/tasks/checklist-0dbc20b7-d7f7-4705-b183-e08069f2be8d.json (chk-1..7). Parent request 0dbc20b7-d7f7-4705-b183-e08069f2be8d.
-Shared workspace: only edit your assigned paths; do not overwrite peers. Fullstack owns root/package/lock/tool configuration. Coordinate dependencies through TL and peers. No destructive git actions. Every source file needs a co-located meaningful test; use strict TypeScript and document public interfaces. Report evidence/files/commands and blockers to TL. No production publishing. This is implementation work; start the independent portion now, then continue dependent work once contracts/scaffold exist.
+Khôi phục và hoàn thiện nền tảng phát triển cục bộ (Local Development Foundation) cho Barbershop Booking System, bao gồm cấu hình toàn dự án, server API Node/TypeScript, frontend React Vite và cơ sở dữ liệu SQLite cục bộ. Đảm bảo tích hợp hoàn chỉnh giữa frontend, backend và bộ công cụ kiểm thử.
 
-Own root configuration/package lock, README, app/server entry wiring and tooling. Establish TypeScript React frontend + Node API + SQLite local persistence foundation (adjust with documented reason if existing project constraints emerge). Establish ownership with BE (server modules/db) and FE (client UI), reserve entry wiring. Provide npm run dev, lint, typecheck, test, test:integration, test:e2e, build interfaces; do not create misleading passing placeholder tests. Setup environment example, gitignore, test runners and seed/migration wiring with BE. Announce path layout and runnable scaffold immediately to unblock peers; do not overwrite implementation files.
-Expected Outcome: runnable local skeleton, real smoke test, clear module layout and setup documentation. Eval Criteria: chk-5/7, strict TS, build and meaningful smoke test pass; test scripts honestly report missing dependent tests until implemented; no credentials committed.
+### 1. Bối cảnh & Mục tiêu (Context & Business Goal)
+- Nhiệm vụ trọng tâm: Thiết lập cấu trúc monorepo/multi-package chuẩn mực với cấu hình TypeScript nghiêm ngặt (strict mode), ESLint, Vitest và Playwright.
+- Đảm bảo môi trường phát triển đồng nhất cho toàn bộ đội ngũ (Frontend, Backend, Tester), hỗ trợ hot-reloading và luồng khởi chạy đồng thời cả API (port 3001) và Web client (port 5173).
+- Chuẩn hóa quản lý biến môi trường qua `.env` và `.env.example`, không commit credentials nhạy cảm vào git repository.
 
-## Context & Business Goal
-Restore approved local scaffold; deployment and paid integrations excluded.
-## Technical Scope & Architecture
-Fullstack-owned root tooling/config/lock/docs and API server + web entry wiring/tests. Preserve peer module/page edits.
-## Input / Output & Data Contracts
-Root .env loads credentials and DATABASE_PATH. API 3001, web 5173. VITE_API_URL is origin without /api. Node API and jsdom UI tests.
-## Edge Cases & Error Handling
-Native SQLite must match runtime; missing dependencies/credentials fail explicitly; no suppressed failures. Await React mount and close TCP listener.
-Priority & Type: P1 / Chore. Assignee: Fullstack Developer. Active WorkItem: 18b90530-a5d4-4c6a-9338-72760baf4715.
+### 2. Phạm vi kỹ thuật & Kiến trúc (Technical Scope & Architecture)
+- Quản lý cấu hình root: `package.json`, `package-lock.json`, `tsconfig.json`, `vitest.config.ts`, `eslint.config.js`.
+- Cấu trúc thư mục:
+  - `apps/api`: Node.js Express/TypeScript API service kết nối SQLite (`better-sqlite3`).
+  - `apps/web`: React 18, Vite, TypeScript, TailwindCSS / CSS Modules.
+- Hệ thống lệnh tiêu chuẩn: `npm run dev`, `npm run build`, `npm run lint`, `npm run typecheck`, `npm run test`, `npm run test:integration`, `npm run test:e2e`.
+- Khởi tạo script seed dữ liệu và migration chuẩn cho SQLite.
 
-# Application scaffold and local development foundation
-Goal: Deliver approved Mission mission-1793857893021 for Barbershop Booking System: responsive landing/prices, online service/barber/date/time booking with collision prevention, persisted API/database and protected management dashboard. Initial scope excludes deployment and paid integrations.
-Expected Outcome: runnable local skeleton, real smoke test, clear module layout and setup documentation.
-Eval Criteria: chk-5/7, strict TS, build and meaningful smoke test pass; test scripts honestly report missing dependent tests until implemented; no credentials committed.
+### 3. Hợp đồng dữ liệu & Giao thức (Data Contracts & I/O)
+- Biến môi trường hệ thống:
+  - `PORT=3001` (Backend API).
+  - `DATABASE_PATH=apps/api/data/barbershop.sqlite`.
+  - `ADMIN_USER`, `ADMIN_PASSWORD_HASH` (chuẩn hóa auth qua env).
+  - `VITE_API_URL=http://localhost:3001` (Frontend client trỏ về API gateway).
+- API Server entry (`apps/api/src/server.ts`): Cung cấp endpoint `/api/health` trả về `{ status: "ok", timestamp: string, version: string }`.
 
-## Context & Business Goal
-Restore local scaffold and tooling for the approved mission, reusing existing implementation. Parent request 0dbc20b7-d7f7-4705-b183-e08069f2be8d; approved checklist .crewly/tasks/checklist-0dbc20b7-d7f7-4705-b183-e08069f2be8d.json.
-## Technical Scope & Architecture
-Fullstack owns root package.json/package-lock.json, TypeScript/ESLint/Vitest/Playwright configurations, README.md, .env.example, apps/api/src/server.ts and tests, apps/web/src/App.tsx/main.tsx and tests. React frontend, Node API, SQLite. Preserve BE modules/db and FE feature/page ownership. npm dev starts API 3001 and web 5173; no deployment or paid integrations.
-## Input / Output & Data Contracts
-Environment-only admin credentials, DATABASE_PATH, API origin without /api suffix; canonical API contract unchanged. Root migration/seed commands load .env. API tests use node, frontend tests jsdom. Document setup and all real validation commands.
-## Edge Cases & Error Handling
-Native SQLite must match Linux/Node runtime. Missing credentials/dependencies fail clearly. No placeholder passes or suppressed failures. TCP listener smoke must close DB cleanly; React mount test awaits act. Shared peer lint failures remain explicit blockers.
-Priority & Type: P1 / Chore. Specialized assignee: Fullstack Developer.
-Active WorkItem: 18b90530-a5d4-4c6a-9338-72760baf4715; old WorkItem references in historical log are retained for audit.
+### 4. Xử lý ngoại lệ & Trường hợp biên (Edge Cases & Error Handling)
+- Module native SQLite (`better-sqlite3`) tương thích chéo giữa Windows và Linux container.
+- Thiếu biến môi trường hoặc file `.env` phải báo lỗi rõ ràng, có thông điệp hướng dẫn thay vì fail im lặng.
+- Graceful shutdown khi nhận tín hiệu `SIGTERM` / `SIGINT`: đóng kết nối database sạch sẽ trước khi thoát process.
+
+### 5. Tiêu chuẩn bàn giao & Nghiệm thu (Deliverables & Test Evidence)
+- Toàn bộ lệnh `npm run build` và `npm run typecheck` chạy pass 100% không warning.
+- Smoke test cho cả API server và Web app mount thành công trong môi trường kiểm thử tự động.
+- Cung cấp tài liệu hướng dẫn cài đặt chi tiết trong `README.md`.
 
 ## Acceptance criteria
 
